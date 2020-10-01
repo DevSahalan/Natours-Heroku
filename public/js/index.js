@@ -1,12 +1,14 @@
 import '@babel/polyfill';
 import { login, logout, signup } from './auth';
 import { updateSettings } from './updateSettings';
+import { bookTour } from './stripe';
 
 //DOM ELEMENTS
 const loginForm = document.querySelector('.form--login');
 const logOutBtn = document.querySelector('.nav__el--logout');
 const signupForm = document.querySelector('.form--signup');
 const userDataForm = document.querySelector('.form-user-data');
+const bookBtn = document.getElementById('book-tour');
 //VALUES
 
 //DELIGATION
@@ -45,6 +47,13 @@ if (userDataForm) {
   });
 }
 
+if (bookBtn) {
+  bookBtn.addEventListener('click', e => {
+    e.target.textContent = 'Processing...';
+    const tourId = e.target.dataset.tourId;
+    bookTour(tourId);
+  });
+}
 // /* eslint-disable */
 // import '@babel/polyfill';
 // import { displayMap } from './mapbox';
