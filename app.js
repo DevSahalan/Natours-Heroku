@@ -26,6 +26,13 @@ app.use(
   })
 );
 
+app.use(
+  cors({
+    origin: 'https://hidden-cliffs-72411.herokuapp.com/',
+    credentials: true
+  })
+);
+
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
