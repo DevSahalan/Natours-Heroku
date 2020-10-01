@@ -7,7 +7,7 @@ block content
       form.form.form--signup
         .form__group
           label.form__label(for='name') Name
-          input#email.form__input.form__signup--name(type='text', placeholder='you@example.com', required)
+          input#name.form__input.form__signup--name(type='text', placeholder='you@example.com', required)
         .form__group
           label.form__label(for='email') Email address
           input#email.form__input.form__signup--email(type='email', placeholder='you@example.com', required)
@@ -16,6 +16,6 @@ block content
           input#password.form__input.form__signup--password(type='password', placeholder='••••••••', required, minlength='8')
           .form__group.ma-bt-md
           label.form__label(for='passConfirmed') Confirm Password
-          input#passConfirmed.form__input.form__signup--passConfirmed(type='password', placeholder='••••••••', required, minlength='8')
+          input#passwordConfirmed.form__input.form__signup--passConfirmed(type='password', placeholder='••••••••', required, minlength='8')
         .form__group
           button.btn.btn--green Sign up
