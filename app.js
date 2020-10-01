@@ -77,23 +77,23 @@ app.use('/api', Limiter);
 //     }
 //   })
 // );
-// app.use(function(req, res, next) {
-//   res.header('Access-Control-Allow-Credentials', true);
-//   res.header('Access-Control-Allow-Origin', req.headers.origin);
-//   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-//   res.header(
-//     'Access-Control-Allow-Headers',
-//     'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept'
-//   );
-//   next();
-// });
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept'
+  );
+  next();
+});
 
 //routes
 app.use(function(req, res, next) {
   res.setHeader(
     'Content-Security-Policy',
     // "default-src * 'unsafe-inline'; script-src 'self' 'unsafe-inline' cdnjs.cloudflare.com https://fonts.googleapis.com/"
-    "script-src 'self' cdnjs.cloudflare.com"
+    "script-src 'self' cdnjs.cloudflare.com  js.stripe.com"
   );
   // console.log(req.cookies);
   return next();
