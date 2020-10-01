@@ -16,6 +16,7 @@ const cors = require('cors');
 const compression = require('compression');
 // const { expressCspHeader, INLINE, NONE, SELF } = require('express-csp-header');
 const viewRouter = require('./routes/viewRoutes');
+const bookingRouter = require('./routes/bookingRoutes');
 
 const app = express();
 app.use(express.json());
