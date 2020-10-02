@@ -19,6 +19,9 @@ const viewRouter = require('./routes/viewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
 
 const app = express();
+
+app.enable('trust proxy');
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(
