@@ -1,89 +1,69 @@
-const path = require('path');
 const express = require('express');
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
-const helmet = require('helmet');
-const mongoSanitize = require('express-mongo-sanitize');
-const xss = require('xss-clean');
-const hpp = require('hpp');
+const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-const compression = require('compression');
-const cors = require('cors');
-
 const AppError = require('./utilis/AppError');
 const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
+const path = require('path');
+const cors = require('cors');
+const compression = require('compression');
+const bodyParser = require('body-parser');
+// const { expressCspHeader, INLINE, NONE, SELF } = require('express-csp-header');
+const viewRouter = require('./routes/viewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
 const bookingController = require('./controllers/bookingController');
-const viewRouter = require('./routes/viewRoutes');
 
-// Start express app
 const app = express();
 
 app.enable('trust proxy');
 
-app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'views'));
-
-// 1) GLOBAL MIDDLEWARES
-// Implement CORS
-app.use(cors());
-// Access-Control-Allow-Origin *
-// api.natours.com, front-end natours.com
-// app.use(cors({
-//   origin: 'https://www.natours.com'
-// }))
-
-app.options('*', cors());
-// app.options('/api/v1/tours/:id', cors());
-
-// Serving static files
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Set security HTTP headers
-app.use(helmet());
-
-// Development logging
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-}
-
-// Limit requests from same API
-const limiter = rateLimit({
-  max: 100,
-  windowMs: 60 * 60 * 1000,
-  message: 'Too many requests from this IP, please try again in an hour!'
-});
-app.use('/api', limiter);
-
-// Stripe webhook, BEFORE body-parser, because stripe needs the body as stream
 app.post(
   '/webhook-checkout',
-  bodyParser.raw({ type: 'application/json' }),
+  bodyParser.raw({ type: 'application / json' }),
   bookingController.webhookCheckout
 );
 
-// Body parser, reading data from body into req.body
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(express.json());
 app.use(cookieParser());
+app.use(
+  express.urlencoded({
+    extended: true
+  })
+);
 
-// Data sanitization against NoSQL query injection
+// app.use(
+//   cors({
+//     origin: 'https://hidden-cliffs-72411.herokuapp.com/',
+//     credentials: true
+//   })
+// );
+
+app.use(cors());
+app.options('*', cors());
+
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(compression());
+app.use(helmet());
+
 app.use(mongoSanitize());
 
-// Data sanitization against XSS
 app.use(xss());
 
-// Prevent parameter pollution
 app.use(
   hpp({
     whitelist: [
       'duration',
-      'ratingsQuantity',
       'ratingsAverage',
+      'ratingsQuantity',
       'maxGroupSize',
       'difficulty',
       'price'
@@ -91,24 +71,77 @@ app.use(
   })
 );
 
-app.use(compression());
-
-// Test middleware
-app.use((req, res, next) => {
-  req.requestTime = new Date().toISOString();
-  // console.log(req.cookies);
-  next();
+const Limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 100,
+  message: 'Too many request from this ip.Please try again in an hour'
 });
 
-// 3) ROUTES
+app.use('/api', Limiter);
+
+//for cookie in localhost
+// app.use(cookieParser());
+// app.use(
+//   session({
+//     secret: 'yoursecret',
+//     cookie: {
+//       path: '/',
+//       domain: 'http://localhost:3000/',
+//       maxAge: 1000 * 60 * 24 // 24 hours
+//     }
+//   })
+// );
+// app.use(function(req, res, next) {
+//   res.header('Access-Control-Allow-Credentials', true);
+//   res.header('Access-Control-Allow-Origin', req.headers.origin);
+//   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+//   res.header(
+//     'Access-Control-Allow-Headers',
+//     'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept'
+//   );
+//   next();
+// });
+
+//routes
+app.use(function(req, res, next) {
+  res.setHeader(
+    'Content-Security-Policy',
+    // "default-src * 'unsafe-inline'; script-src 'self' 'unsafe-inline' cdnjs.cloudflare.com https://fonts.googleapis.com/"
+    "script-src 'self' cdnjs.cloudflare.com  js.stripe.com"
+  );
+  // console.log(req.cookies);
+  return next();
+});
+
 app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/bookings', bookingRouter);
 
+// app.use(
+//   expressCspHeader({
+//     directives: {
+//       'default-src': [SELF],
+//       'script-src': [SELF, INLINE, 'cdnjs.cloudflare.com'],
+//       'style-src': [SELF, 'mystyles.net'],
+//       'img-src': ['data:', 'images.com'],
+//       'worker-src': [NONE],
+//       'block-all-mixed-content': true
+//     }
+//   })
+// );
+
 app.all('*', (req, res, next) => {
-  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+  // res.status(404).json({
+  //   status: 'fail',
+  //   message: `can't find ${req.originalUrl} in this server`
+  // });
+
+  // const err = new Error(`can't find ${req.originalUrl} in this server`);
+  // err.statusCode = 404;
+  // err.status = 'fail';
+  next(new AppError(`can't find ${req.originalUrl} on this server`, 404));
 });
 
 app.use(globalErrorHandler);
