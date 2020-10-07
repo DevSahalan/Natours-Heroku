@@ -14,6 +14,7 @@ const hpp = require('hpp');
 const path = require('path');
 const cors = require('cors');
 const compression = require('compression');
+const bodyParser = require('body-parser');
 // const { expressCspHeader, INLINE, NONE, SELF } = require('express-csp-header');
 const viewRouter = require('./routes/viewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
@@ -23,7 +24,11 @@ const app = express();
 
 app.enable('trust proxy');
 
-app.post('/webhook-checkout', express.raw(), bookingController.webhookCheckout);
+app.post(
+  '/webhook-checkout',
+  bodyParser.raw({ type: 'application / json' }),
+  bookingController.webhookCheckout
+);
 
 app.use(express.json());
 app.use(cookieParser());
