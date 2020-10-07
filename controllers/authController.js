@@ -144,7 +144,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
-  console.log(token);
+  // console.log(token);
 
   if (!token) {
     return next(

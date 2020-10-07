@@ -30,12 +30,15 @@ app.use(
   })
 );
 
-app.use(
-  cors({
-    origin: 'https://hidden-cliffs-72411.herokuapp.com/',
-    credentials: true
-  })
-);
+// app.use(
+//   cors({
+//     origin: 'https://hidden-cliffs-72411.herokuapp.com/',
+//     credentials: true
+//   })
+// );
+
+app.use(cors());
+app.options('*', cors());
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -80,16 +83,16 @@ app.use('/api', Limiter);
 //     }
 //   })
 // );
-app.use(function(req, res, next) {
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Origin', req.headers.origin);
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept'
-  );
-  next();
-});
+// app.use(function(req, res, next) {
+//   res.header('Access-Control-Allow-Credentials', true);
+//   res.header('Access-Control-Allow-Origin', req.headers.origin);
+//   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+//   res.header(
+//     'Access-Control-Allow-Headers',
+//     'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept'
+//   );
+//   next();
+// });
 
 //routes
 app.use(function(req, res, next) {
